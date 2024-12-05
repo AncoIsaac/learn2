@@ -24,9 +24,9 @@ export class AuthService {
   async login(user: User) {
     const payload = { sub: user.id, role: user.role };
     return {
+      access_token: this.jwtService.sign(payload),
       message: 'Inicio de seccion exitosamente',
       data: { name: user.name, email: user.email },
-      access_token: this.jwtService.sign(payload),
     };
   }
 }

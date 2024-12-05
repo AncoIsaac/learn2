@@ -11,6 +11,14 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createUserDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
     try {
       return await this.prisma.$transaction(async (prisma) => {
         const user = await prisma.user.create({
@@ -22,9 +30,6 @@ export class UsersService {
         return user;
       });
     } catch (error) {
-      if (error.code === 'P2002') {
-        throw new ConflictException('Email already registered');
-      }
       throw error;
     }
   }
