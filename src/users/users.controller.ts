@@ -14,7 +14,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ExcludePasswordInterceptor } from './exclude-password.interceptor';
 import {
-  ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiOkResponse,
@@ -26,7 +25,6 @@ import { Roles } from 'src/auth/roles/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/jwt/JwtAuthGuard';
 import { CounterGuard } from 'src/auth/roles/counter.guard';
 
-@ApiTags('users')
 @ApiBearerAuth()
 @Controller('users')
 export class UsersController {
