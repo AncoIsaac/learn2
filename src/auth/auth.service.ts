@@ -26,7 +26,7 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       message: 'Inicio de seccion exitosamente',
-      data: { name: user.name, email: user.email },
+      data: { name: user.name, email: user.email, role: user.role },
     };
   }
 }
