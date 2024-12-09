@@ -8,11 +8,38 @@ generator client {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  email    String  @unique
+  id       Int      @id @default(autoincrement())
+  email    String   @unique
   name     String?
   password String
-  role     Role    @default(user)
+  role     Role     @default(user)
+  persons  Person[] // Relación con las personas que el usuario puede asignar
+}
+
+model Person {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  userId      Int // Relación con el usuario que asigna la persona
+  user        User        @relation(fields: [userId], references: [id])
+  inventories Inventory[] // Relación con los inventarios asignados a la persona
+}
+
+model Inventory {
+  id          Int       @id @default(autoincrement())
+  description String
+  quantity    Int
+  price       Float
+  locationId  Int? // Relación con la ubicación
+  location    Location? @relation(fields: [locationId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  persons     Person[] // Relación con las personas a las que se asigna este inventario
+}
+
+model Location {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  inventories Inventory[] // Relación con los inventarios asignados a esta ubicación
 }
 
 enum Role {
