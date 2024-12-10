@@ -5,8 +5,18 @@ import { RolesModule } from './roles/roles.module';
 import { PersonModule } from './person/person.module';
 import { LocationsModule } from './locations/locations.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { NotificationsGateway } from './notifications/notifications.gateway';
+import { NotificationsModule } from './notifications/notifications.module';
 @Module({
-  imports: [UsersModule, AuthModule, RolesModule, PersonModule, LocationsModule, InventoryModule],
-  providers: [],
+  imports: [
+    UsersModule,
+    AuthModule,
+    RolesModule,
+    PersonModule,
+    LocationsModule,
+    InventoryModule,
+    NotificationsModule,
+  ],
+  providers: [NotificationsGateway],
 })
 export class AppModule {}

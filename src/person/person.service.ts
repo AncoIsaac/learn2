@@ -1,5 +1,6 @@
 // persons.service.ts
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -8,10 +9,14 @@ import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
 import { Person } from '@prisma/client';
 import { PrismaService } from 'prisma/prismaService/prisma.service';
+import { NotificationsGateway } from 'src/notifications/notifications.gateway';
 
 @Injectable()
 export class PersonService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsGateway: NotificationsGateway,
+  ) {}
 
   async create(
     createPersonDto: CreatePersonDto,
@@ -141,5 +146,43 @@ export class PersonService {
       where: { id },
       data: { deleted: true }, // Actualiza el campo `deleted` a `true`
     });
+  }
+
+  async removeLocationFromPerson(personId: number): Promise<Person> {
+    // Verificar si la persona existe
+    const person = await this.prisma.person.findUnique({
+      where: { id: personId },
+      include: { location: true },
+    });
+
+    if (!person) {
+      throw new NotFoundException(`Person with ID ${personId} not found`);
+    }
+
+    // Verificar si la persona tiene una ubicación asignada
+    if (!person.location) {
+      throw new BadRequestException(
+        `Person with ID ${personId} does not have a location assigned`,
+      );
+    }
+
+    // Quitar la ubicación asignada a la persona
+    const updatedPerson = await this.prisma.person.update({
+      where: { id: personId },
+      data: {
+        location: {
+          disconnect: true,
+        },
+      },
+      include: { location: true },
+    });
+
+    // Enviar notificación en tiempo real
+    this.notificationsGateway.sendNotification('locationRemoved', {
+      message: `La ubicación ha sido terminada por ${updatedPerson.name}`,
+      person: updatedPerson,
+    });
+
+    return updatedPerson;
   }
 }

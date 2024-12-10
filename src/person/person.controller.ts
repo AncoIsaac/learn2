@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
@@ -14,7 +16,7 @@ import { JwtAuthGuard } from 'src/auth/jwt/JwtAuthGuard';
 import { RolesGuard } from 'src/auth/roles/roles.guard';
 import { Roles } from 'src/auth/roles/roles.decorator';
 import { PersonService } from './person.service';
-import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @Controller('persons')
@@ -60,5 +62,15 @@ export class PersonsController {
   @Roles('admin')
   async remove(@Param('id') id: string) {
     return this.personsService.remove(+id);
+  }
+
+  @Delete(':id/location') // Ruta específica para quitar la ubicación
+  @HttpCode(HttpStatus.OK)
+  @ApiResponse({
+    status: 200,
+    description: 'La ubicación ha sido quitada de la persona',
+  })
+  async removeLocationFromPerson(@Param('id') id: string) {
+    return this.personsService.removeLocationFromPerson(+id);
   }
 }
