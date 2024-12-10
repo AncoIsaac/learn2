@@ -3,57 +3,69 @@ import {
   Get,
   Post,
   Body,
-  Put,
   Param,
+  Put,
   Delete,
-  HttpCode,
-  HttpStatus,
 } from '@nestjs/common';
 import { InventoryService } from './inventory.service';
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
-import { Inventory } from '@prisma/client';
+import { AssignInventoryDto } from './dto/assign-inventory.dto';
 
 @Controller('inventory')
 export class InventoryController {
   constructor(private readonly inventoryService: InventoryService) {}
 
   @Post()
-  async create(
-    @Body() createInventoryDto: CreateInventoryDto,
-  ): Promise<Inventory> {
+  create(@Body() createInventoryDto: CreateInventoryDto) {
     return this.inventoryService.create(createInventoryDto);
   }
 
   @Get()
-  async findAll(): Promise<Inventory[]> {
+  findAll() {
     return this.inventoryService.findAll();
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Inventory> {
+  findOne(@Param('id') id: string) {
     return this.inventoryService.findOne(+id);
   }
 
   @Put(':id')
-  async update(
+  update(
     @Param('id') id: string,
     @Body() updateInventoryDto: UpdateInventoryDto,
-  ): Promise<Inventory> {
+  ) {
     return this.inventoryService.update(+id, updateInventoryDto);
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param('id') id: string): Promise<void> {
-    await this.inventoryService.remove(+id);
+  remove(@Param('id') id: string) {
+    return this.inventoryService.remove(+id);
   }
 
-  @Post(':id/assign-location/:locationId')
-  async assignLocation(
-    @Param('id') id: string,
-    @Param('locationId') locationId: string,
-  ): Promise<Inventory> {
-    return this.inventoryService.assignLocation(+id, +locationId);
+  // @Post('assign-location')
+  // assignLocation(
+  //   @Body('inventoryId') inventoryId: number,
+  //   @Body('locationId') locationId: number,
+  // ) {
+  //   return this.inventoryService.assignLocation(inventoryId, locationId);
+  // }
+
+  @Post('assign-location-to-person')
+  assignLocationToPerson(
+    @Body() assignInventoryDto: AssignInventoryDto,
+    // @Body('personId') personId: number,
+    // @Body('locationId') locationId: number,
+  ) {
+    return this.inventoryService.assignLocationToPerson(assignInventoryDto);
+  }
+
+  @Post('start-inventory-count')
+  startInventoryCount(
+    @Body('personId') personId: number,
+    @Body('inventoryId') inventoryId: number,
+  ) {
+    return this.inventoryService.startInventoryCount(personId, inventoryId);
   }
 }

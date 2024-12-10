@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { PrismaService } from 'prisma/prismaService/prisma.service';
@@ -9,9 +9,24 @@ export class LocationsService {
   constructor(private prisma: PrismaService) {}
 
   async create(createLocationDto: CreateLocationDto): Promise<Location> {
-    return this.prisma.location.create({
-      data: createLocationDto,
+    const existingUser = await this.prisma.location.findUnique({
+      where: { name: createLocationDto.name },
     });
+
+    if (existingUser) {
+      throw new ConflictException('location already registered');
+    }
+
+    try {
+      return await this.prisma.$transaction(async (prisma) => {
+        const person = await prisma.location.create({
+          data: createLocationDto,
+        });
+        return person;
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findAll(): Promise<Location[]> {

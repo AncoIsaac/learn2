@@ -6,7 +6,8 @@ import {
 import { CreateInventoryDto } from './dto/create-inventory.dto';
 import { UpdateInventoryDto } from './dto/update-inventory.dto';
 import { PrismaService } from 'prisma/prismaService/prisma.service';
-import { Inventory } from '@prisma/client';
+import { Inventory, Person } from '@prisma/client';
+import { AssignInventoryDto } from './dto/assign-inventory.dto';
 
 @Injectable()
 export class InventoryService {
@@ -23,22 +24,22 @@ export class InventoryService {
   }
 
   async findOne(id: number): Promise<Inventory | null> {
-    const invetory = await this.prisma.inventory.findUnique({
+    const inventory = await this.prisma.inventory.findUnique({
       where: { id },
     });
 
-    if (!invetory) {
-      throw new NotFoundException(`invnetory with ID ${id} not found`);
+    if (!inventory) {
+      throw new NotFoundException(`Inventory with ID ${id} not found`);
     }
 
-    return invetory;
+    return inventory;
   }
 
   async update(
     id: number,
     updateInventoryDto: UpdateInventoryDto,
   ): Promise<Inventory> {
-    const inventory = this.prisma.inventory.findUnique({
+    const inventory = await this.prisma.inventory.findUnique({
       where: { id },
     });
 
@@ -60,15 +61,76 @@ export class InventoryService {
       throw new NotFoundException(`Inventory with ID ${id} not found`);
     }
 
-    return this.prisma.inventory.delete({
+    return this.prisma.inventory.update({
       where: { id },
+      data: { deleted: true },
     });
   }
 
-  async assignLocation(
+  async assignLocationToPerson(
+    assignInventoryDto: AssignInventoryDto,
+  ): Promise<Person> {
+    const { personId, locationId } = assignInventoryDto;
+
+    // Verificar si la persona existe
+    const person = await this.prisma.person.findUnique({
+      where: { id: personId },
+      include: { location: true },
+    });
+
+    if (!person) {
+      throw new NotFoundException(`Person with ID ${personId} not found`);
+    }
+
+    // Verificar si la persona ya tiene una ubicación asignada
+    if (person.location) {
+      throw new BadRequestException('Person is already assigned to a location');
+    }
+
+    // Verificar si la ubicación ya está asignada a otra persona
+    const existingPersonWithLocation = await this.prisma.person.findFirst({
+      where: { locationId, id: { not: personId } }, // Busca a otra persona con la misma ubicación
+      include: { location: true },
+    });
+
+    if (existingPersonWithLocation) {
+      throw new BadRequestException(
+        `Location with ID ${locationId} is already assigned to another person: ${existingPersonWithLocation.name}`,
+      );
+    }
+
+    // Asignar la ubicación a la persona
+    const updatedPerson = await this.prisma.person.update({
+      where: { id: personId },
+      data: {
+        location: {
+          connect: { id: locationId },
+        },
+      },
+      include: { location: true }, // Incluye la ubicación en la respuesta
+    });
+
+    return updatedPerson;
+  }
+
+  // Método para iniciar el conteo de inventarios
+  async startInventoryCount(
+    personId: number,
     inventoryId: number,
-    locationId: number,
   ): Promise<Inventory> {
+    const person = await this.prisma.person.findUnique({
+      where: { id: personId },
+      include: { location: true },
+    });
+
+    if (!person) {
+      throw new NotFoundException(`Person with ID ${personId} not found`);
+    }
+
+    if (!person.location) {
+      throw new BadRequestException('Person is not assigned to a location');
+    }
+
     const inventory = await this.prisma.inventory.findUnique({
       where: { id: inventoryId },
       include: { location: true },
@@ -78,19 +140,12 @@ export class InventoryService {
       throw new NotFoundException(`Inventory with ID ${inventoryId} not found`);
     }
 
-    if (inventory.location) {
+    if (inventory.locationId !== person.locationId) {
       throw new BadRequestException(
-        'Inventory is already assigned to a location',
+        'Inventory is not located in the assigned location',
       );
     }
 
-    return this.prisma.inventory.update({
-      where: { id: inventoryId },
-      data: {
-        location: {
-          connect: { id: locationId },
-        },
-      },
-    });
+    return inventory;
   }
 }

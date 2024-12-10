@@ -9,6 +9,7 @@ export class CreatePersonDto {
   })
   name: string;
 
+  @ApiProperty()
   @IsNumber()
   @IsNotEmpty({
     message: 'El userId no puede estar vacio',

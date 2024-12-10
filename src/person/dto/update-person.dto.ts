@@ -7,5 +7,6 @@ export class UpdatePersonDto {
   name?: string;
 
   @IsNumber()
+  @ApiProperty()
   userId?: number;
 }

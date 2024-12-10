@@ -4,5 +4,5 @@ export class AssignInventoryDto {
   @ApiProperty()
   personId: number;
   @ApiProperty()
-  inventoryId: number;
+  locationId: number;
 }

@@ -11,6 +11,7 @@ import { LocationsService } from './locations.service';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { Location } from '@prisma/client';
+import { ApiOkResponse, ApiOperation } from '@nestjs/swagger';
 
 @Controller('locations')
 export class LocationsController {
@@ -22,6 +23,8 @@ export class LocationsController {
   }
 
   @Get()
+  @ApiOperation({ summary: 'Get all location' })
+  @ApiOkResponse({ description: 'List of users', type: [CreateLocationDto] })
   async findAll(): Promise<Location[]> {
     return this.locationsService.findAll();
   }
