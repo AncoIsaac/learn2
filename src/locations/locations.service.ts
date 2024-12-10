@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { PrismaService } from 'prisma/prismaService/prisma.service';
@@ -50,8 +54,18 @@ export class LocationsService {
   }
 
   async remove(id: number) {
-    return this.prisma.location.delete({
+    const location = await this.prisma.person.findUnique({
       where: { id },
+    });
+
+    if (!location) {
+      throw new NotFoundException(`Person with ID ${id} not found`);
+    }
+
+    // Marcar la persona como eliminada (eliminación lógica)
+    return this.prisma.person.update({
+      where: { id },
+      data: { deleted: true }, // Actualiza el campo `deleted` a `true`
     });
   }
 }

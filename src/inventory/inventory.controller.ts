@@ -44,28 +44,8 @@ export class InventoryController {
     return this.inventoryService.remove(+id);
   }
 
-  // @Post('assign-location')
-  // assignLocation(
-  //   @Body('inventoryId') inventoryId: number,
-  //   @Body('locationId') locationId: number,
-  // ) {
-  //   return this.inventoryService.assignLocation(inventoryId, locationId);
-  // }
-
   @Post('assign-location-to-person')
-  assignLocationToPerson(
-    @Body() assignInventoryDto: AssignInventoryDto,
-    // @Body('personId') personId: number,
-    // @Body('locationId') locationId: number,
-  ) {
+  assignLocationToPerson(@Body() assignInventoryDto: AssignInventoryDto) {
     return this.inventoryService.assignLocationToPerson(assignInventoryDto);
-  }
-
-  @Post('start-inventory-count')
-  startInventoryCount(
-    @Body('personId') personId: number,
-    @Body('inventoryId') inventoryId: number,
-  ) {
-    return this.inventoryService.startInventoryCount(personId, inventoryId);
   }
 }

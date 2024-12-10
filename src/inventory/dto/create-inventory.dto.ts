@@ -9,4 +9,10 @@ export class CreateInventoryDto {
 
   @ApiProperty()
   price: number;
+
+  @ApiProperty()
+  createdById: number;
+
+  @ApiProperty()
+  locationId: number;
 }

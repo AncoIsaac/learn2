@@ -18,14 +18,14 @@ model User {
 }
 
 model Person {
-  id          Int         @id @default(autoincrement())
-  name        String      @unique
-  userId      Int // Relación con el usuario que asigna la persona
-  user        User        @relation(fields: [userId], references: [id])
-  inventories Inventory[] // Relación con los inventarios asignados a la persona
-  locationId  Int? // Relación con la ubicación
-  location    Location?   @relation(fields: [locationId], references: [id])
-  deleted     Boolean     @default(false) // Campo para eliminación lógica
+  id                 Int         @id @default(autoincrement())
+  name               String      @unique
+  userId             Int // Relación con el usuario que asigna la persona
+  user               User        @relation(fields: [userId], references: [id])
+  locationId         Int? // Relación con la ubicación
+  location           Location?   @relation(fields: [locationId], references: [id])
+  createdInventories Inventory[] // Relación con los inventarios creados por esta persona
+  deleted            Boolean     @default(false) // Campo para eliminación lógica
 }
 
 model Inventory {
@@ -35,9 +35,10 @@ model Inventory {
   price       Float
   locationId  Int? // Relación con la ubicación
   location    Location? @relation(fields: [locationId], references: [id])
+  createdById Int // Relación con la persona que creó el inventario
+  createdBy   Person    @relation(fields: [createdById], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  persons     Person[] // Relación con las personas a las que se asigna este inventario
   deleted     Boolean   @default(false) // Campo para eliminación lógica
 }
 

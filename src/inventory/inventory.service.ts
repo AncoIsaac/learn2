@@ -14,18 +14,47 @@ export class InventoryService {
   constructor(private prisma: PrismaService) {}
 
   async create(createInventoryDto: CreateInventoryDto): Promise<Inventory> {
-    return this.prisma.inventory.create({
+    // Crear el inventario
+    const createdInventory = await this.prisma.inventory.create({
       data: createInventoryDto,
     });
+
+    // Obtener el inventario recién creado con las relaciones incluidas
+    const inventoryWithRelations = await this.prisma.inventory.findUnique({
+      where: { id: createdInventory.id },
+      include: {
+        location: true, // Incluir la ubicación
+        createdBy: true, // Incluir la persona que creó el inventario
+      },
+    });
+
+    return inventoryWithRelations;
   }
 
-  async findAll(): Promise<Inventory[]> {
-    return this.prisma.inventory.findMany();
+  async findAll(): Promise<{ inventory: Inventory }[]> {
+    const findAllInventory = await this.prisma.inventory.findMany({
+      where: {
+        deleted: false, // Filtrar inventarios no eliminados
+      },
+      include: {
+        location: true, // Incluir la ubicación
+        createdBy: true, // Incluir la persona que creó el inventario
+      },
+    });
+
+    // Mapear los resultados para devolver un objeto con la clave "inventory"
+    return findAllInventory.map((inventory) => ({
+      inventory,
+    }));
   }
 
   async findOne(id: number): Promise<Inventory | null> {
     const inventory = await this.prisma.inventory.findUnique({
       where: { id },
+      include: {
+        location: true,
+        createdBy: true,
+      },
     });
 
     if (!inventory) {
@@ -111,41 +140,5 @@ export class InventoryService {
     });
 
     return updatedPerson;
-  }
-
-  // Método para iniciar el conteo de inventarios
-  async startInventoryCount(
-    personId: number,
-    inventoryId: number,
-  ): Promise<Inventory> {
-    const person = await this.prisma.person.findUnique({
-      where: { id: personId },
-      include: { location: true },
-    });
-
-    if (!person) {
-      throw new NotFoundException(`Person with ID ${personId} not found`);
-    }
-
-    if (!person.location) {
-      throw new BadRequestException('Person is not assigned to a location');
-    }
-
-    const inventory = await this.prisma.inventory.findUnique({
-      where: { id: inventoryId },
-      include: { location: true },
-    });
-
-    if (!inventory) {
-      throw new NotFoundException(`Inventory with ID ${inventoryId} not found`);
-    }
-
-    if (inventory.locationId !== person.locationId) {
-      throw new BadRequestException(
-        'Inventory is not located in the assigned location',
-      );
-    }
-
-    return inventory;
   }
 }
