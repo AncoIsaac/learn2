@@ -141,4 +141,45 @@ export class InventoryService {
 
     return updatedPerson;
   }
+
+  async checkSameQuantityInLocation(
+    locationId: number,
+  ): Promise<{ sameQuantity: boolean; counts: { [key: string]: number } }> {
+    const inventaries = await this.prisma.inventory.findMany({
+      where: {
+        locationId,
+        deleted: false,
+      },
+      select: {
+        quantity: true,
+      },
+    });
+
+    if (inventaries.length === 0) {
+      throw new BadRequestException(`No hay conteos en esa ubicación `);
+    }
+
+    const quantities = inventaries.map((invetory) => invetory.quantity);
+
+    const referenceQuantity = quantities[0];
+
+    const allSameQuantity = quantities.every(
+      (quantity) => quantity === referenceQuantity,
+    );
+
+    const counts = quantities.reduce(
+      (acc, quantity, index) => {
+        const countsName = `Conteo ${index + 1}`;
+
+        acc[countsName] = quantity;
+        return acc;
+      },
+      {} as { [key: string]: number },
+    );
+
+    return {
+      sameQuantity: allSameQuantity,
+      counts,
+    };
+  }
 }

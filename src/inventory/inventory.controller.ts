@@ -48,4 +48,14 @@ export class InventoryController {
   assignLocationToPerson(@Body() assignInventoryDto: AssignInventoryDto) {
     return this.inventoryService.assignLocationToPerson(assignInventoryDto);
   }
+
+  @Get('check-quantity/:locationId')
+  async checkSameQuantityInLocation(
+    @Param('locationId') locationId: string,
+  ): Promise<{ sameQuantity: boolean; counts: { [key: string]: number } }> {
+    const result = await this.inventoryService.checkSameQuantityInLocation(
+      parseInt(locationId),
+    );
+    return result;
+  }
 }
