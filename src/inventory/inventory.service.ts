@@ -31,7 +31,7 @@ export class InventoryService {
     return inventoryWithRelations;
   }
 
-  async findAll(): Promise<{ inventory: Inventory }[]> {
+  async findAll(): Promise<Inventory[]> {
     const findAllInventory = await this.prisma.inventory.findMany({
       where: {
         deleted: false, // Filtrar inventarios no eliminados
@@ -43,9 +43,7 @@ export class InventoryService {
     });
 
     // Mapear los resultados para devolver un objeto con la clave "inventory"
-    return findAllInventory.map((inventory) => ({
-      inventory,
-    }));
+    return findAllInventory;
   }
 
   async findOne(id: number): Promise<Inventory | null> {

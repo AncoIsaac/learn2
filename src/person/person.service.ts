@@ -65,29 +65,19 @@ export class PersonService {
     }
   }
 
-  async findAll(): Promise<{ person: Person }[]> {
+  async findAll(): Promise<Person[]> {
     const persons = await this.prisma.person.findMany({
       where: {
         deleted: false,
       },
       include: {
-        user: {
-          select: {
-            name: true,
-          },
-        },
-        location: {
-          select: {
-            name: true,
-          },
-        },
+        user: { select: { name: true } },
+        location: true,
       },
     });
 
     // Mapear los resultados para incluir el nombre del usuario
-    return persons.map((person) => ({
-      person,
-    }));
+    return persons;
   }
 
   async findOne(id: number): Promise<{ person: Person } | null> {
