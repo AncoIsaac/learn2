@@ -18,7 +18,7 @@ export class UnauthorizedExceptionFilter implements ExceptionFilter {
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message: 'User not authorized',
+      message: 'Token caducado',
       error: 'Unauthorized',
     });
   }
