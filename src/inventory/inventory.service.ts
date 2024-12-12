@@ -140,9 +140,10 @@ export class InventoryService {
     return updatedPerson;
   }
 
-  async checkSameQuantityInLocation(
-    locationId: number,
-  ): Promise<{ sameQuantity: boolean; counts: { [key: string]: number } }> {
+  async checkSameQuantityInLocation(locationId: number): Promise<{
+    sameQuantity: boolean;
+    counts: { [key: string]: { quantity: number; description: string } };
+  }> {
     const inventaries = await this.prisma.inventory.findMany({
       where: {
         locationId,
@@ -150,14 +151,15 @@ export class InventoryService {
       },
       select: {
         quantity: true,
+        description: true, // Incluir la descripción en la consulta
       },
     });
 
     if (inventaries.length === 0) {
-      throw new BadRequestException(`No hay conteos en esa ubicación `);
+      throw new BadRequestException(`No hay conteos en esa ubicación`);
     }
 
-    const quantities = inventaries.map((invetory) => invetory.quantity);
+    const quantities = inventaries.map((inventory) => inventory.quantity);
 
     const referenceQuantity = quantities[0];
 
@@ -165,14 +167,18 @@ export class InventoryService {
       (quantity) => quantity === referenceQuantity,
     );
 
-    const counts = quantities.reduce(
-      (acc, quantity, index) => {
+    const counts = inventaries.reduce(
+      (acc, inventory, index) => {
         const countsName = `Conteo ${index + 1}`;
 
-        acc[countsName] = quantity;
+        // Agregar la cantidad y la descripción al objeto de conteo
+        acc[countsName] = {
+          quantity: inventory.quantity,
+          description: inventory.description,
+        };
         return acc;
       },
-      {} as { [key: string]: number },
+      {} as { [key: string]: { quantity: number; description: string } },
     );
 
     return {

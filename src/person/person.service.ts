@@ -37,7 +37,6 @@ export class PersonService {
         `Person with name "${createPersonDto.name}" already exists`,
       );
     }
-    console.log('existingPerson :>> ', existingPerson);
 
     try {
       return await this.prisma.$transaction(async (prisma) => {
