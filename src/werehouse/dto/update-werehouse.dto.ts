@@ -1,4 +1,12 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateWerehouseDto } from './create-werehouse.dto';
+import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateWerehouseDto extends PartialType(CreateWerehouseDto) {}
+export class UpdateWerehouseDto {
+  @ApiProperty()
+  description?: string;
+
+  @ApiProperty()
+  quantity?: number;
+
+  @ApiProperty()
+  locationId?: number;
+}
