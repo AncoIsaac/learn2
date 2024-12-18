@@ -7,6 +7,7 @@ import { LocationsModule } from './locations/locations.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { NotificationsGateway } from './notifications/notifications.gateway';
 import { NotificationsModule } from './notifications/notifications.module';
+import { WerehouseModule } from './werehouse/werehouse.module';
 @Module({
   imports: [
     UsersModule,
@@ -16,6 +17,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     LocationsModule,
     InventoryModule,
     NotificationsModule,
+    WerehouseModule,
   ],
   providers: [NotificationsGateway],
 })

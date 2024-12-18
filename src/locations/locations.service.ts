@@ -34,13 +34,39 @@ export class LocationsService {
   }
 
   async findAll(): Promise<Location[]> {
-    return this.prisma.location.findMany();
+    const location = this.prisma.location.findMany({
+      include: {
+        persons: true,
+      },
+    });
+
+    return (await location).map((location) => ({
+      ...location,
+      persons:
+        location.persons.length > 0
+          ? location.persons
+          : 'No hay personas asignadas',
+    }));
   }
 
-  async findOne(id: number): Promise<Location | null> {
-    return this.prisma.location.findUnique({
+  async findOne(id: number): Promise<{ location: Location; message: string }> {
+    const location = await this.prisma.location.findUnique({
       where: { id },
+      include: {
+        persons: true, // Incluye las personas relacionadas
+      },
     });
+
+    if (!location) {
+      return { location: null, message: 'No existe la Ubicacion' };
+    }
+
+    // Agrega un campo adicional para el mensaje si no hay personas asignadas
+    return {
+      location: location,
+      message:
+        location.persons.length > 0 ? undefined : 'No hay personas asignadas',
+    };
   }
 
   async update(

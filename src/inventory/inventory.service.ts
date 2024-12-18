@@ -96,7 +96,7 @@ export class InventoryService {
 
   async assignLocationToPerson(
     assignInventoryDto: AssignInventoryDto,
-  ): Promise<Person> {
+  ): Promise<{ person: Person; message: string }> {
     const { personId, locationId } = assignInventoryDto;
 
     // Verificar si la persona existe
@@ -122,7 +122,7 @@ export class InventoryService {
 
     if (existingPersonWithLocation) {
       throw new BadRequestException(
-        `Location with ID ${locationId} is already assigned to another person: ${existingPersonWithLocation.name}`,
+        `Location ${existingPersonWithLocation.location.name} is already assigned to another person: ${existingPersonWithLocation.name}`,
       );
     }
 
@@ -137,13 +137,23 @@ export class InventoryService {
       include: { location: true }, // Incluye la ubicación en la respuesta
     });
 
-    return updatedPerson;
+    return {
+      message: 'Ubicación agregada correctamente',
+      person: updatedPerson,
+    };
   }
 
   async checkSameQuantityInLocation(locationId: number): Promise<{
     sameQuantity: boolean;
-    counts: { [key: string]: { quantity: number; description: string } };
+    counts: {
+      [key: string]: {
+        quantity: number;
+        description: string;
+        location: any; // Cambiamos el tipo para permitir el objeto completo de location
+      };
+    };
   }> {
+    // Consulta para obtener solo la propiedad `location` de los inventarios
     const inventaries = await this.prisma.inventory.findMany({
       where: {
         locationId,
@@ -151,7 +161,8 @@ export class InventoryService {
       },
       select: {
         quantity: true,
-        description: true, // Incluir la descripción en la consulta
+        description: true,
+        location: true, // Seleccionamos solo la propiedad `location`
       },
     });
 
@@ -171,14 +182,16 @@ export class InventoryService {
       (acc, inventory, index) => {
         const countsName = `Conteo ${index + 1}`;
 
-        // Agregar la cantidad y la descripción al objeto de conteo
         acc[countsName] = {
           quantity: inventory.quantity,
           description: inventory.description,
+          location: inventory.location,
         };
         return acc;
       },
-      {} as { [key: string]: { quantity: number; description: string } },
+      {} as {
+        [key: string]: { quantity: number; description: string; location: any };
+      },
     );
 
     return {
