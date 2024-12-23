@@ -178,10 +178,17 @@ export class PersonService {
     filter: { locationIdIsNull?: boolean } = {},
     pagination: { page?: number; limit?: number } = {},
   ): Promise<{ persons: Person[]; total: number }> {
+    // Definir la condición base
     const whereClause = {
       deleted: false,
-      ...(filter.locationIdIsNull && { locationId: null }),
     };
+
+    // Añadir la condición de asignación/no asignación según el filtro
+    if (filter.locationIdIsNull !== undefined) {
+      whereClause['locationId'] = filter.locationIdIsNull
+        ? null
+        : { not: null };
+    }
 
     const [persons, totalItems] = await Promise.all([
       this.prisma.person.findMany({
