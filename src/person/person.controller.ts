@@ -9,6 +9,7 @@ import {
   HttpCode,
   HttpStatus,
   Put,
+  Query,
 } from '@nestjs/common';
 import { CreatePersonDto } from './dto/create-person.dto';
 import { UpdatePersonDto } from './dto/update-person.dto';
@@ -72,5 +73,18 @@ export class PersonsController {
   })
   async removeLocationFromPerson(@Param('id') id: string) {
     return this.personsService.removeLocationFromPerson(+id);
+  }
+
+  @Get('filter/data')
+  // @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Get all persons' })
+  async filterPersons(
+    @Query('locationIdIsNull') locationIdIsNull: string,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ) {
+    const filter = { locationIdIsNull: locationIdIsNull === 'true' };
+    const pagination = { page, limit };
+    return this.personsService.filterPersons(filter, pagination);
   }
 }

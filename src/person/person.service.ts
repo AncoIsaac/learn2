@@ -75,13 +75,12 @@ export class PersonService {
       },
     });
 
-    // Mapear los resultados para incluir el nombre del usuario
     return persons;
   }
 
   async findOne(id: number): Promise<{ person: Person } | null> {
     const person = await this.prisma.person.findUnique({
-      where: { id },
+      where: { id: id },
       include: {
         user: {
           select: {
@@ -173,5 +172,39 @@ export class PersonService {
     });
 
     return updatedPerson;
+  }
+
+  async filterPersons(
+    filter: { locationIdIsNull?: boolean } = {},
+    pagination: { page?: number; limit?: number } = {},
+  ): Promise<{ persons: Person[]; total: number }> {
+    const whereClause = {
+      deleted: false,
+      ...(filter.locationIdIsNull && { locationId: null }),
+    };
+
+    const [persons, totalItems] = await Promise.all([
+      this.prisma.person.findMany({
+        where: whereClause,
+        include: {
+          user: { select: { name: true } },
+          location: true,
+        },
+        skip:
+          +pagination.page && +pagination.limit
+            ? (+pagination.page - 1) * +pagination.limit
+            : undefined,
+        take: +pagination.limit,
+      }),
+      this.prisma.person.count({ where: whereClause }),
+    ]);
+
+    // Calcular el número de páginas
+    const totalPages = Math.ceil(totalItems / +pagination.limit);
+
+    return {
+      persons,
+      total: totalPages, // Devolver el número de páginas en lugar del total de elementos
+    };
   }
 }
