@@ -41,7 +41,7 @@ export class PersonsController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
-  // @Roles('accountant')
+  @Roles('accountant')
   @ApiOperation({ summary: 'Get a person by ID' })
   async findOne(@Param('id') id: string) {
     return this.personsService.findOne(+id);
@@ -67,6 +67,8 @@ export class PersonsController {
   }
 
   @Delete(':id/location') // Ruta específica para quitar la ubicación
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('accountant')
   @HttpCode(HttpStatus.OK)
   @ApiResponse({
     status: 200,
