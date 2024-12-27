@@ -33,14 +33,15 @@ export class PersonsController {
   }
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Get all persons' })
   async findAll() {
     return this.personsService.findAll();
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  // @Roles('accountant')
   @ApiOperation({ summary: 'Get a person by ID' })
   async findOne(@Param('id') id: string) {
     return this.personsService.findOne(+id);
@@ -76,7 +77,7 @@ export class PersonsController {
   }
 
   @Get('filter/data')
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get all persons' })
   async filterPersons(
     @Query('locationIdIsNull') locationIdIsNull: string,

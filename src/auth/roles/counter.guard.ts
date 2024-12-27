@@ -11,7 +11,7 @@ export class CounterGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    if (user && user.role === 'contador') {
+    if (user && user.role === 'accountant') {
       return !roles || !roles.includes('admin');
     }
 
