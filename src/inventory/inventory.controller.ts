@@ -54,7 +54,12 @@ export class InventoryController {
     @Param('locationId') locationId: string,
   ): Promise<{
     sameQuantity: boolean;
-    counts: { [key: string]: { quantity: number; description: string } };
+    counts: {
+      [key: string]: {
+        quantity: number;
+        description: string;
+      };
+    };
   }> {
     const result = await this.inventoryService.checkSameQuantityInLocation(
       parseInt(locationId),

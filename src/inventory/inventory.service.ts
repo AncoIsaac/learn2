@@ -188,8 +188,11 @@ export class InventoryService {
         quantity: true,
         description: true,
         location: true, // Seleccionamos solo la propiedad `location`
+        createdBy: true,
       },
     });
+
+    console.log('invetaries :>> ', inventaries);
 
     if (inventaries.length === 0) {
       throw new BadRequestException(`No hay conteos en esa ubicación`);
@@ -211,11 +214,17 @@ export class InventoryService {
           quantity: inventory.quantity,
           description: inventory.description,
           location: inventory.location,
+          createdBy: inventory.createdBy,
         };
         return acc;
       },
       {} as {
-        [key: string]: { quantity: number; description: string; location: any };
+        [key: string]: {
+          quantity: number;
+          description: string;
+          location: any;
+          createdBy: any;
+        };
       },
     );
 
