@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -14,21 +15,45 @@ export class InventoryService {
   constructor(private prisma: PrismaService) {}
 
   async create(createInventoryDto: CreateInventoryDto): Promise<Inventory> {
-    // Crear el inventario
-    const createdInventory = await this.prisma.inventory.create({
-      data: createInventoryDto,
-    });
+    try {
+      return this.prisma.$transaction(async (prisma) => {
+        // Verificar si el locationId existe
+        const locationExists = await prisma.location.findUnique({
+          where: { id: createInventoryDto.locationId },
+        });
+        const perosonsExists = await prisma.person.findUnique({
+          where: { id: createInventoryDto.createdById },
+        });
 
-    // Obtener el inventario recién creado con las relaciones incluidas
-    const inventoryWithRelations = await this.prisma.inventory.findUnique({
-      where: { id: createdInventory.id },
-      include: {
-        location: true, // Incluir la ubicación
-        createdBy: true, // Incluir la persona que creó el inventario
-      },
-    });
+        if (!locationExists) {
+          throw new ConflictException(
+            'El locationId proporcionado no existe en la tabla Location',
+          );
+        }
 
-    return inventoryWithRelations;
+        if (!perosonsExists) {
+          throw new ConflictException('La persona proporcionada no existe ');
+        }
+
+        // Crear el inventario
+        const createdInventory = await prisma.inventory.create({
+          data: createInventoryDto,
+        });
+
+        // Obtener el inventario con las relaciones incluidas
+        const inventoryWithRelations = await prisma.inventory.findUnique({
+          where: { id: createdInventory.id },
+          include: {
+            location: true,
+            createdBy: true,
+          },
+        });
+
+        return inventoryWithRelations;
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 
   async findAll(): Promise<Inventory[]> {
