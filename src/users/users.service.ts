@@ -10,9 +10,6 @@ import { User, Person } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prismaService/prisma.service';
 import { CreatePersonDto } from 'src/person/dto/create-person.dto';
-// import { AssignInventoryDto } from 'src/inventory/dto/assign-inventory.dto';
-// import { CreateLocationDto } from 'src/locations/dto/create-location.dto';
-// import { AssignLocationDto } from 'src/locations/dto/assign-location.dto';
 
 @Injectable()
 export class UsersService {
@@ -112,57 +109,4 @@ export class UsersService {
       },
     });
   }
-
-  // async assignInventoryToPerson(
-  //   assignInventoryDto: AssignInventoryDto,
-  // ): Promise<Person> {
-  //   const { personId, inventoryId } = assignInventoryDto;
-
-  //   return this.prisma.person.update({
-  //     where: { id: personId },
-  //     data: {
-  //       inventories: {
-  //         connect: { id: inventoryId },
-  //       },
-  //     },
-  //   });
-  // }
-
-  // async createLocation(
-  //   createLocationDto: CreateLocationDto,
-  // ): Promise<Location> {
-  //   return this.prisma.location.create({
-  //     data: createLocationDto,
-  //   });
-  // }
-
-  // async assignLocationToInventory(
-  //   assignLocationDto: AssignLocationDto,
-  // ): Promise<Inventory> {
-  //   const { inventoryId, locationId } = assignLocationDto;
-
-  //   const inventory = await this.prisma.inventory.findUnique({
-  //     where: { id: inventoryId },
-  //     include: { location: true },
-  //   });
-
-  //   if (!inventory) {
-  //     throw new NotFoundException(`Inventory with ID ${inventoryId} not found`);
-  //   }
-
-  //   if (inventory.location) {
-  //     throw new BadRequestException(
-  //       'Inventory is already assigned to a location',
-  //     );
-  //   }
-
-  //   return this.prisma.inventory.update({
-  //     where: { id: inventoryId },
-  //     data: {
-  //       location: {
-  //         connect: { id: locationId },
-  //       },
-  //     },
-  //   });
-  // }
 }
