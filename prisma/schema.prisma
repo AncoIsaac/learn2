@@ -55,7 +55,7 @@ model Werehouse {
   id          Int       @id @default(autoincrement())
   description String
   quantity    Int
-  locationId  Int? // Relación con la ubicación
+  locationId  Int?      @unique
   location    Location? @relation(fields: [locationId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

@@ -192,8 +192,6 @@ export class InventoryService {
       },
     });
 
-    console.log('invetaries :>> ', inventaries);
-
     if (inventaries.length === 0) {
       throw new BadRequestException(`No hay conteos en esa ubicación`);
     }
