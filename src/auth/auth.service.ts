@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UsersService } from '../users/users.service';
+// import { UsersService } from '../users/users.service';
 import { User, Person } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'prisma/prismaService/prisma.service';
@@ -8,13 +8,16 @@ import { PrismaService } from 'prisma/prismaService/prisma.service';
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
+    // private usersService: UsersService,
     private jwtService: JwtService,
     private prisma: PrismaService, // Inyecta el servicio de Prisma
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.usersService.findOneByEmail(email);
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    // const user = await this.usersService.findOneByEmail(email);
     if (user && (await bcrypt.compare(password, user.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;

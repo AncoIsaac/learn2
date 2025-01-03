@@ -67,11 +67,11 @@ export class UsersService {
     return user;
   }
 
-  async findOneByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
-      where: { email },
-    });
-  }
+  // async findOneByEmail(email: string): Promise<User | null> {
+  //   return this.prisma.user.findUnique({
+  //     where: { email },
+  //   });
+  // }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     if (updateUserDto.password) {
