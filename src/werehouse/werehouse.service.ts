@@ -106,8 +106,6 @@ export class WerehouseService {
       [key: string]: {
         quantity: number;
         description: string;
-        location: any;
-        createdBy: any;
       };
     };
     werehouseQuantity?: number; // Agregamos la cantidad de werehouse

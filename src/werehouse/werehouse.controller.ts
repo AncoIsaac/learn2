@@ -60,7 +60,7 @@ export class WerehouseController {
     };
   }> {
     const result = await this.werehouseService.checkSameQuantityInLocation(
-      parseInt(locationId),
+      Number(locationId),
     );
     return result;
   }
